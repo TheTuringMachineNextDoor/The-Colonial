@@ -1,0 +1,357 @@
+import React, { useState, useEffect } from "react";
+import { Article } from "@/entities/Article";
+import { User } from "@/entities/User";
+import { SendEmail } from "@/integrations/Core";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { CheckCircle2, XCircle, Clock, Eye, Mail, Loader2 } from "lucide-react";
+import { format } from "date-fns";
+import ReactMarkdown from "react-markdown";
+
+export default function EditorDashboard() {
+  const [articles, setArticles] = useState([]);
+  const [selectedArticle, setSelectedArticle] = useState(null);
+  const [feedback, setFeedback] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [activeTab, setActiveTab] = useState("pending");
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setIsLoading(true);
+    try {
+      const user = await User.me();
+      setCurrentUser(user);
+      const allArticles = await Article.list("-created_date");
+      setArticles(allArticles);
+    } catch (error) {
+      console.error("Error loading data:", error);
+    }
+    setIsLoading(false);
+  };
+
+  const handleApprove = async (article) => {
+    setIsProcessing(true);
+    try {
+      await Article.update(article.id, {
+        status: "approved",
+        reviewed_by: currentUser.email,
+        reviewed_date: new Date().toISOString()
+      });
+
+      if (article.author_email) {
+        await SendEmail({
+          to: article.author_email,
+          subject: `Your submission "${article.title}" has been approved!`,
+          body: `Dear ${article.author},\n\nGreat news! Your article "${article.title}" has been approved and published on The Colonial.\n\nYou can view it live on our website. Thank you for your contribution!\n\nBest regards,\nThe Colonial Editorial Team`
+        });
+      }
+
+      setSelectedArticle(null);
+      loadData();
+    } catch (error) {
+      console.error("Error approving article:", error);
+    }
+    setIsProcessing(false);
+  };
+
+  const handleReject = async (article) => {
+    if (!feedback.trim()) {
+      alert("Please provide feedback for the author");
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      await Article.update(article.id, {
+        status: "rejected",
+        editor_feedback: feedback,
+        reviewed_by: currentUser.email,
+        reviewed_date: new Date().toISOString()
+      });
+
+      if (article.author_email) {
+        await SendEmail({
+          to: article.author_email,
+          subject: `Feedback on your submission "${article.title}"`,
+          body: `Dear ${article.author},\n\nThank you for submitting "${article.title}" to The Colonial. After careful review, we've decided not to publish this piece at this time.\n\nHere's our editorial feedback:\n\n${feedback}\n\nWe encourage you to revise and resubmit, or to submit other work in the future. We appreciate your interest in The Colonial.\n\nBest regards,\nThe Colonial Editorial Team`
+        });
+      }
+
+      setSelectedArticle(null);
+      setFeedback("");
+      loadData();
+    } catch (error) {
+      console.error("Error rejecting article:", error);
+    }
+    setIsProcessing(false);
+  };
+
+  const getCategoryLabel = (category) => {
+    const labels = {
+      essay: "Essay",
+      research: "Research",
+      cartoon: "Cartoon",
+      puzzle: "Puzzle",
+      short_story: "Short Story",
+      op_ed: "Op-Ed",
+      satirical_news: "Satirical News"
+    };
+    return labels[category] || category;
+  };
+
+  const filterArticles = (status) => {
+    return articles.filter(a => a.status === status);
+  };
+
+  const pendingCount = filterArticles("pending").length;
+  const approvedCount = filterArticles("approved").length;
+  const rejectedCount = filterArticles("rejected").length;
+
+  if (!currentUser) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-20 text-center">
+        <Alert className="bg-red-50 border-red-200">
+          <AlertDescription className="text-red-800">
+            Please log in to access the editor dashboard.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-12">
+      <div className="mb-8">
+        <h1 className="font-serif text-4xl font-bold mb-2">Editor Dashboard</h1>
+        <p className="text-gray-600">Review and manage article submissions</p>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full md:w-auto grid-cols-3 md:inline-grid">
+          <TabsTrigger value="pending" className="relative">
+            Pending Review
+            {pendingCount > 0 && (
+              <Badge className="ml-2 bg-amber-500">{pendingCount}</Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="approved">
+            Approved ({approvedCount})
+          </TabsTrigger>
+          <TabsTrigger value="rejected">
+            Rejected ({rejectedCount})
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="pending" className="space-y-4">
+          {isLoading ? (
+            <div className="text-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin mx-auto text-gray-400" />
+            </div>
+          ) : filterArticles("pending").length === 0 ? (
+            <div className="text-center py-12 bg-white border-2 border-gray-200 rounded-lg">
+              <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500 text-lg">No pending submissions</p>
+            </div>
+          ) : (
+            <div className="grid gap-6">
+              {filterArticles("pending").map((article) => (
+                <div key={article.id} className="bg-white border-2 border-amber-200 p-6 hover:shadow-lg transition-shadow">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                      <h3 className="font-serif text-2xl font-bold mb-2">{article.title}</h3>
+                      <div className="flex flex-wrap gap-3 text-sm text-gray-600">
+                        <span className="flex items-center gap-1">
+                          <Badge variant="outline">{getCategoryLabel(article.category)}</Badge>
+                        </span>
+                        <span>By {article.author}</span>
+                        {article.author_email && (
+                          <span className="flex items-center gap-1">
+                            <Mail className="w-3 h-3" />
+                            {article.author_email}
+                          </span>
+                        )}
+                        <span>Submitted {format(new Date(article.created_date), "MMM d, yyyy")}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {article.excerpt && (
+                    <p className="text-gray-700 mb-4 leading-relaxed">{article.excerpt}</p>
+                  )}
+
+                  <div className="flex gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => setSelectedArticle(article)}
+                      className="flex items-center gap-2"
+                    >
+                      <Eye className="w-4 h-4" />
+                      Review
+                    </Button>
+                    <Button
+                      onClick={() => handleApprove(article)}
+                      disabled={isProcessing}
+                      className="bg-green-600 hover:bg-green-700 flex items-center gap-2"
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      Quick Approve
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="approved" className="space-y-4">
+          {filterArticles("approved").map((article) => (
+            <div key={article.id} className="bg-white border-2 border-green-200 p-6">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="font-serif text-xl font-bold mb-2">{article.title}</h3>
+                  <div className="flex flex-wrap gap-3 text-sm text-gray-600">
+                    <Badge className="bg-green-100 text-green-800">Approved</Badge>
+                    <span>By {article.author}</span>
+                    <span>Published {format(new Date(article.published_date), "MMM d, yyyy")}</span>
+                    {article.reviewed_by && <span>Reviewed by {article.reviewed_by}</span>}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </TabsContent>
+
+        <TabsContent value="rejected" className="space-y-4">
+          {filterArticles("rejected").map((article) => (
+            <div key={article.id} className="bg-white border-2 border-red-200 p-6">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <h3 className="font-serif text-xl font-bold mb-2">{article.title}</h3>
+                  <div className="flex flex-wrap gap-3 text-sm text-gray-600 mb-3">
+                    <Badge className="bg-red-100 text-red-800">Rejected</Badge>
+                    <span>By {article.author}</span>
+                    {article.reviewed_by && <span>Reviewed by {article.reviewed_by}</span>}
+                  </div>
+                  {article.editor_feedback && (
+                    <div className="bg-gray-50 p-4 rounded border">
+                      <p className="text-sm font-semibold mb-2">Editorial Feedback:</p>
+                      <p className="text-sm text-gray-700">{article.editor_feedback}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </TabsContent>
+      </Tabs>
+
+      {/* Review Dialog */}
+      <Dialog open={!!selectedArticle} onOpenChange={() => setSelectedArticle(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-3xl">Review Submission</DialogTitle>
+            <DialogDescription>
+              Read the full article and decide whether to approve or reject with feedback
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedArticle && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="font-serif text-2xl font-bold mb-2">{selectedArticle.title}</h2>
+                {selectedArticle.subtitle && (
+                  <p className="text-xl text-gray-600 mb-4">{selectedArticle.subtitle}</p>
+                )}
+                <div className="flex flex-wrap gap-3 text-sm text-gray-600 mb-4">
+                  <Badge variant="outline">{getCategoryLabel(selectedArticle.category)}</Badge>
+                  <span>By {selectedArticle.author}</span>
+                  {selectedArticle.author_email && <span>{selectedArticle.author_email}</span>}
+                  {selectedArticle.read_time && <span>{selectedArticle.read_time} min read</span>}
+                </div>
+              </div>
+
+              {selectedArticle.featured_image && (
+                <img 
+                  src={selectedArticle.featured_image} 
+                  alt={selectedArticle.title}
+                  className="w-full max-h-64 object-cover rounded"
+                />
+              )}
+
+              <div className="prose max-w-none">
+                <ReactMarkdown>{selectedArticle.content}</ReactMarkdown>
+              </div>
+
+              <div className="border-t pt-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold mb-2">
+                    Feedback for Author (required if rejecting)
+                  </label>
+                  <Textarea
+                    value={feedback}
+                    onChange={(e) => setFeedback(e.target.value)}
+                    placeholder="Provide constructive feedback..."
+                    rows={6}
+                    className="border-2"
+                  />
+                </div>
+
+                <div className="flex gap-3 justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedArticle(null);
+                      setFeedback("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleReject(selectedArticle)}
+                    disabled={isProcessing}
+                    className="flex items-center gap-2"
+                  >
+                    {isProcessing ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <XCircle className="w-4 h-4" />
+                    )}
+                    Reject & Send Feedback
+                  </Button>
+                  <Button
+                    onClick={() => handleApprove(selectedArticle)}
+                    disabled={isProcessing}
+                    className="bg-green-600 hover:bg-green-700 flex items-center gap-2"
+                  >
+                    {isProcessing ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="w-4 h-4" />
+                    )}
+                    Approve & Publish
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
