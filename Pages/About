@@ -1,0 +1,209 @@
+import React from "react";
+import { Shield, Eye, Megaphone, Users, Feather, Scale } from "lucide-react";
+
+const teamMembers = [
+  {
+    name: "Eleanor Hartwell",
+    role: "Editor-in-Chief",
+    bio: "Former investigative journalist with 15 years experience covering politics and culture. Believes in the power of words to challenge, inspire, and transform.",
+    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400"
+  },
+  {
+    name: "Marcus Chen",
+    role: "Managing Editor",
+    bio: "Award-winning essayist and cultural critic. Passionate about amplifying diverse voices and stories that challenge conventional narratives.",
+    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400"
+  },
+  {
+    name: "Safiya Rahman",
+    role: "Fiction Editor",
+    bio: "Published novelist and short story writer. Champions experimental fiction and emerging voices in contemporary literature.",
+    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400"
+  },
+  {
+    name: "James O'Sullivan",
+    role: "Satire Editor",
+    bio: "Former stand-up comedian turned writer. Believes humor is the most effective weapon against absurdity and injustice.",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400"
+  },
+  {
+    name: "Dr. Aisha Okafor",
+    role: "Research Director",
+    bio: "PhD in Investigative Journalism. Leads our fact-checking team and oversees long-form investigative pieces.",
+    image: "https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=400"
+  },
+  {
+    name: "Diego Morales",
+    role: "Art Director",
+    bio: "Visual storyteller with a background in editorial design. Curates our cartoons, illustrations, and visual essays.",
+    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400"
+  }
+];
+
+const principles = [
+  {
+    icon: Shield,
+    title: "No Ads. Ever.",
+    description: "We're reader-supported, which means we answer only to you. No corporate sponsors dictating our content or compromising our integrity."
+  },
+  {
+    icon: Eye,
+    title: "No Clutter.",
+    description: "Clean, focused design that puts the content first. No pop-ups, no distractions, no infinite scroll—just quality writing and thoughtful presentation."
+  },
+  {
+    icon: Megaphone,
+    title: "Little to No Censorship.",
+    description: "We believe in editorial judgment, not censorship. If it's well-argued, well-written, and adds value to the conversation, we'll publish it—even if it makes people uncomfortable."
+  },
+  {
+    icon: Users,
+    title: "Diverse Voices.",
+    description: "The best ideas come from different perspectives. We actively seek out writers from varied backgrounds, experiences, and viewpoints."
+  },
+  {
+    icon: Feather,
+    title: "Writer First.",
+    description: "We pay our contributors fairly and promptly. Writers deserve compensation for their labor, and we put our money where our mouth is."
+  },
+  {
+    icon: Scale,
+    title: "Editorial Independence.",
+    description: "No corporate owners, no political parties, no special interests. Our loyalty is to truth, quality, and our readers—in that order."
+  }
+];
+
+export default function About() {
+  return (
+    <div className="bg-stone-50">
+      {/* Hero Section */}
+      <div className="bg-black text-white py-20">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <h1 className="font-gothic text-6xl md:text-7xl font-bold mb-6">
+            About The Colonial
+          </h1>
+          <p className="text-xl md:text-2xl text-gray-300 leading-relaxed">
+            Independent journalism for independent thinkers.
+          </p>
+        </div>
+      </div>
+
+      {/* Mission Statement */}
+      <div className="max-w-4xl mx-auto px-4 py-16">
+        <div className="bg-white border-4 border-black p-12">
+          <h2 className="font-serif text-4xl font-bold mb-6 text-center">Our Mission</h2>
+          <div className="prose prose-lg max-w-none">
+            <p className="text-xl leading-relaxed text-gray-700 mb-6">
+              <strong>The Colonial</strong> was founded on a simple premise: quality writing deserves a 
+              platform free from corporate interference, algorithmic manipulation, and the constant 
+              barrage of advertisements that plague modern media.
+            </p>
+            <p className="text-lg leading-relaxed text-gray-700 mb-6">
+              We publish essays that challenge conventional wisdom, research that digs deeper than 
+              headlines, stories that transport and transform, and satire that speaks truth through 
+              laughter. Our commitment is to our readers and our writers—not to advertisers, 
+              shareholders, or any political agenda.
+            </p>
+            <p className="text-lg leading-relaxed text-gray-700">
+              In an age of information overload and manufactured outrage, we believe in the power 
+              of thoughtful, well-crafted writing to cut through the noise and illuminate what matters.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Core Principles */}
+      <div className="bg-white py-16 border-t-2 border-b-2 border-black">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="font-serif text-5xl font-bold mb-4 text-center">What We Stand For</h2>
+          <div className="w-24 h-1 bg-black mx-auto mb-12" />
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {principles.map((principle, index) => (
+              <div key={index} className="bg-stone-50 border-2 border-gray-300 p-6 hover:border-amber-700 transition-colors">
+                <principle.icon className="w-12 h-12 text-amber-700 mb-4" />
+                <h3 className="font-serif text-2xl font-bold mb-3">{principle.title}</h3>
+                <p className="text-gray-700 leading-relaxed">{principle.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Meet the Team */}
+      <div className="max-w-7xl mx-auto px-4 py-16">
+        <h2 className="font-serif text-5xl font-bold mb-4 text-center">Meet the Team</h2>
+        <div className="w-24 h-1 bg-black mx-auto mb-4" />
+        <p className="text-center text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
+          The people behind The Colonial: editors, writers, and truth-seekers committed to 
+          maintaining editorial excellence and independence.
+        </p>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {teamMembers.map((member, index) => (
+            <div key={index} className="bg-white border-2 border-gray-200 overflow-hidden hover:shadow-xl transition-shadow">
+              <div className="aspect-square overflow-hidden bg-gray-200">
+                <img
+                  src={member.image}
+                  alt={member.name}
+                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-300"
+                />
+              </div>
+              <div className="p-6">
+                <h3 className="font-serif text-2xl font-bold mb-1">{member.name}</h3>
+                <p className="text-amber-700 font-semibold uppercase text-sm tracking-wide mb-4">
+                  {member.role}
+                </p>
+                <p className="text-gray-700 leading-relaxed text-sm">{member.bio}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Call to Action */}
+      <div className="bg-gradient-to-b from-amber-50 to-white py-16 border-t-2 border-black">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <h2 className="font-serif text-4xl font-bold mb-6">Join Our Mission</h2>
+          <p className="text-xl text-gray-700 mb-8 leading-relaxed">
+            Whether you're a writer, reader, or supporter, there's a place for you at The Colonial. 
+            Help us build something that matters.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <a 
+              href="/submit" 
+              className="inline-block bg-amber-700 hover:bg-amber-800 text-white px-8 py-4 font-semibold uppercase tracking-wide transition-colors"
+            >
+              Submit Your Work
+            </a>
+            <a 
+              href="/donate" 
+              className="inline-block bg-red-600 hover:bg-red-700 text-white px-8 py-4 font-semibold uppercase tracking-wide transition-colors"
+            >
+              Support Us
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* Contact Section */}
+      <div className="max-w-4xl mx-auto px-4 py-16">
+        <div className="bg-white border-2 border-gray-300 p-8 text-center">
+          <h3 className="font-serif text-3xl font-bold mb-4">Get in Touch</h3>
+          <p className="text-gray-700 mb-6 leading-relaxed">
+            Have a story idea? Want to pitch an article? Questions about our editorial process? 
+            We'd love to hear from you.
+          </p>
+          <div className="space-y-2 text-lg">
+            <p>
+              <strong>Editorial:</strong> <a href="mailto:editorial@thecolonial.com" className="text-amber-700 hover:underline">editorial@thecolonial.com</a>
+            </p>
+            <p>
+              <strong>General Inquiries:</strong> <a href="mailto:info@thecolonial.com" className="text-amber-700 hover:underline">info@thecolonial.com</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
