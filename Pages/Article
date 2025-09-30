@@ -1,0 +1,195 @@
+import React, { useState, useEffect } from "react";
+import { Article as ArticleEntity } from "@/entities/Article";
+import { Clock, User, Calendar, Share2, BookmarkPlus } from "lucide-react";
+import { format } from "date-fns";
+import ReactMarkdown from "react-markdown";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+
+export default function Article() {
+  const [article, setArticle] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadArticle();
+  }, []);
+
+  const loadArticle = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const articleId = urlParams.get('id');
+    
+    if (articleId) {
+      const data = await ArticleEntity.list();
+      const found = data.find(a => a.id === articleId);
+      setArticle(found);
+    }
+    setIsLoading(false);
+  };
+
+  const getCategoryLabel = (category) => {
+    const labels = {
+      essay: "Essay",
+      research: "Research",
+      cartoon: "Cartoon",
+      puzzle: "Puzzle",
+      short_story: "Short Story",
+      op_ed: "Op-Ed",
+      satirical_news: "Satirical News"
+    };
+    return labels[category] || category;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <Skeleton className="h-12 w-3/4 mb-4" />
+        <Skeleton className="h-6 w-1/2 mb-8" />
+        <Skeleton className="h-96 w-full mb-8" />
+        <Skeleton className="h-40 w-full" />
+      </div>
+    );
+  }
+
+  if (!article) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-20 text-center">
+        <h1 className="font-serif text-4xl font-bold mb-4">Article Not Found</h1>
+        <p className="text-gray-600">The article you're looking for doesn't exist.</p>
+      </div>
+    );
+  }
+
+  return (
+    <article className="bg-white">
+      {/* Article Header */}
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-6">
+            <span className="text-sm font-bold tracking-widest uppercase text-amber-700">
+              {getCategoryLabel(article.category)}
+            </span>
+            <span className="w-1 h-1 bg-gray-400 rounded-full" />
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Calendar className="w-4 h-4" />
+              <span>{format(new Date(article.published_date), "MMMM d, yyyy")}</span>
+            </div>
+          </div>
+
+          <h1 className="font-serif text-5xl md:text-6xl font-bold leading-tight mb-6">
+            {article.title}
+          </h1>
+
+          {article.subtitle && (
+            <p className="text-2xl text-gray-600 leading-relaxed mb-8">
+              {article.subtitle}
+            </p>
+          )}
+
+          <div className="flex items-center justify-between py-6 border-y border-gray-200">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                <User className="w-6 h-6 text-gray-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-lg">{article.author}</p>
+                {article.author_bio && (
+                  <p className="text-sm text-gray-600">{article.author_bio}</p>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              {article.read_time && (
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Clock className="w-4 h-4" />
+                  <span>{article.read_time} min read</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Featured Image */}
+        {article.featured_image && (
+          <div className="mb-12">
+            <img
+              src={article.featured_image}
+              alt={article.title}
+              className="w-full h-auto max-h-[600px] object-cover"
+            />
+          </div>
+        )}
+
+        {/* Article Content */}
+        <div className="prose prose-lg max-w-none">
+          <style>{`
+            .prose {
+              font-family: 'Georgia', serif;
+              color: #1a1a1a;
+              line-height: 1.8;
+            }
+            .prose p {
+              margin-bottom: 1.5em;
+              font-size: 1.125rem;
+            }
+            .prose h2 {
+              font-family: 'Playfair Display', serif;
+              font-size: 2rem;
+              font-weight: 700;
+              margin-top: 2.5em;
+              margin-bottom: 1em;
+              line-height: 1.3;
+            }
+            .prose h3 {
+              font-family: 'Playfair Display', serif;
+              font-size: 1.5rem;
+              font-weight: 600;
+              margin-top: 2em;
+              margin-bottom: 0.75em;
+            }
+            .prose blockquote {
+              border-left: 4px solid #d4af37;
+              padding-left: 1.5rem;
+              font-style: italic;
+              color: #4a4a4a;
+              margin: 2em 0;
+            }
+            .prose a {
+              color: #d4af37;
+              text-decoration: underline;
+            }
+            .prose a:hover {
+              color: #b8941f;
+            }
+            .prose ul, .prose ol {
+              margin: 1.5em 0;
+              padding-left: 2em;
+            }
+            .prose li {
+              margin-bottom: 0.5em;
+            }
+          `}</style>
+          <ReactMarkdown>{article.content}</ReactMarkdown>
+        </div>
+
+        {/* Article Footer */}
+        <div className="mt-16 pt-8 border-t-2 border-black">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 mb-2">Share this article</p>
+              <div className="flex gap-3">
+                <Button variant="outline" size="sm">
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Share
+                </Button>
+                <Button variant="outline" size="sm">
+                  <BookmarkPlus className="w-4 h-4 mr-2" />
+                  Save
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
