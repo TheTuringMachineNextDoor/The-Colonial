@@ -1,0 +1,94 @@
+{
+  "name": "Article",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Article headline"
+    },
+    "subtitle": {
+      "type": "string",
+      "description": "Article subheading or deck"
+    },
+    "author": {
+      "type": "string",
+      "description": "Author name"
+    },
+    "author_email": {
+      "type": "string",
+      "description": "Author email for communication"
+    },
+    "author_bio": {
+      "type": "string",
+      "description": "Brief author biography"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "essay",
+        "research",
+        "cartoon",
+        "puzzle",
+        "short_story",
+        "op_ed",
+        "satirical_news"
+      ],
+      "description": "Article category/section"
+    },
+    "content": {
+      "type": "string",
+      "description": "Full article content in markdown"
+    },
+    "excerpt": {
+      "type": "string",
+      "description": "Brief excerpt or lede"
+    },
+    "featured_image": {
+      "type": "string",
+      "description": "URL to featured image"
+    },
+    "published_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Publication date"
+    },
+    "is_featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether article appears in featured section"
+    },
+    "read_time": {
+      "type": "number",
+      "description": "Estimated read time in minutes"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Editorial status"
+    },
+    "editor_feedback": {
+      "type": "string",
+      "description": "Feedback from editor on rejected submissions"
+    },
+    "reviewed_by": {
+      "type": "string",
+      "description": "Email of editor who reviewed"
+    },
+    "reviewed_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the article was reviewed"
+    }
+  },
+  "required": [
+    "title",
+    "author",
+    "category",
+    "content"
+  ]
+}
