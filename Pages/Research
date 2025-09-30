@@ -1,0 +1,56 @@
+
+import React, { useState, useEffect } from "react";
+import { Article } from "@/entities/Article";
+import ArticleCard from "../components/articles/ArticleCard";
+import { Skeleton } from "@/components/ui/skeleton";
+
+export default function Research() {
+  const [articles, setArticles] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadArticles();
+  }, []);
+
+  const loadArticles = async () => {
+    setIsLoading(true);
+    const data = await Article.filter({ category: "research", status: "approved" }, "-published_date");
+    setArticles(data);
+    setIsLoading(false);
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-12">
+      <div className="mb-12">
+        <h1 className="font-serif text-5xl md:text-6xl font-bold mb-4">Research</h1>
+        <div className="w-24 h-1 bg-black mb-6" />
+        <p className="text-xl text-gray-600 leading-relaxed max-w-3xl">
+          In-depth research papers, investigative journalism, and scholarly work examining 
+          important topics with rigor and curiosity.
+        </p>
+      </div>
+
+      {isLoading ? (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {Array(6).fill(0).map((_, i) => (
+            <div key={i} className="space-y-4">
+              <Skeleton className="h-48 w-full" />
+              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-20 w-full" />
+            </div>
+          ))}
+        </div>
+      ) : articles.length > 0 ? (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {articles.map((article) => (
+            <ArticleCard key={article.id} article={article} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-20">
+          <p className="text-gray-500 text-lg">No research papers published yet.</p>
+        </div>
+      )}
+    </div>
+  );
+}
