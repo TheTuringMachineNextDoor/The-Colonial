@@ -1,0 +1,278 @@
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Heart, CheckCircle2, Coffee, Newspaper, Award } from "lucide-react";
+
+export default function Donate() {
+  const [donationAmount, setDonationAmount] = useState("");
+  const [customAmount, setCustomAmount] = useState("");
+  const [donorName, setDonorName] = useState("");
+  const [donorEmail, setDonorEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const presetAmounts = [
+    { amount: 5, label: "$5", icon: Coffee, description: "Buy us a coffee" },
+    { amount: 25, label: "$25", icon: Newspaper, description: "Support a story" },
+    { amount: 50, label: "$50", icon: Award, description: "Become a patron" },
+    { amount: 100, label: "$100", icon: Heart, description: "Major supporter" }
+  ];
+
+  const handlePresetClick = (amount) => {
+    setDonationAmount(amount.toString());
+    setCustomAmount("");
+  };
+
+  const handleCustomChange = (value) => {
+    setCustomAmount(value);
+    setDonationAmount(value);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setShowSuccess(true);
+    setTimeout(() => {
+      setShowSuccess(false);
+      setDonationAmount("");
+      setCustomAmount("");
+      setDonorName("");
+      setDonorEmail("");
+      setMessage("");
+    }, 3000);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-stone-50 to-white">
+      <div className="max-w-5xl mx-auto px-4 py-12">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <div className="inline-block mb-6">
+            <Heart className="w-16 h-16 text-red-600 mx-auto mb-4" />
+          </div>
+          <h1 className="font-gothic text-5xl md:text-6xl font-bold mb-6">
+            Support The Colonial
+          </h1>
+          <p className="text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto">
+            Your generosity keeps independent journalism alive. Every contribution helps us 
+            continue publishing thoughtful essays, investigative research, creative fiction, 
+            and sharp satire.
+          </p>
+        </div>
+
+        {showSuccess && (
+          <Alert className="mb-8 bg-green-50 border-green-200">
+            <CheckCircle2 className="h-5 w-5 text-green-600" />
+            <AlertDescription className="text-green-800 font-medium">
+              Thank you for your generous support! Your contribution makes a real difference.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Donation Form */}
+          <div className="lg:col-span-2">
+            <div className="bg-white border-2 border-gray-200 p-8">
+              <h2 className="font-serif text-3xl font-bold mb-6">Make a Contribution</h2>
+              
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Preset Amounts */}
+                <div>
+                  <Label className="text-sm font-semibold uppercase tracking-wide mb-4 block">
+                    Choose an Amount
+                  </Label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {presetAmounts.map((preset) => (
+                      <button
+                        key={preset.amount}
+                        type="button"
+                        onClick={() => handlePresetClick(preset.amount)}
+                        className={`p-4 border-2 rounded-lg transition-all duration-200 hover:border-red-600 hover:shadow-md ${
+                          donationAmount === preset.amount.toString() && !customAmount
+                            ? 'border-red-600 bg-red-50'
+                            : 'border-gray-200'
+                        }`}
+                      >
+                        <preset.icon className={`w-8 h-8 mx-auto mb-2 ${
+                          donationAmount === preset.amount.toString() && !customAmount
+                            ? 'text-red-600'
+                            : 'text-gray-400'
+                        }`} />
+                        <p className="font-bold text-xl mb-1">{preset.label}</p>
+                        <p className="text-xs text-gray-600">{preset.description}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Custom Amount */}
+                <div>
+                  <Label htmlFor="custom" className="text-sm font-semibold uppercase tracking-wide mb-2 block">
+                    Or Enter Custom Amount
+                  </Label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg font-medium">
+                      $
+                    </span>
+                    <Input
+                      id="custom"
+                      type="number"
+                      min="1"
+                      step="0.01"
+                      value={customAmount}
+                      onChange={(e) => handleCustomChange(e.target.value)}
+                      placeholder="Enter amount"
+                      className="pl-8 text-lg border-2 h-14"
+                    />
+                  </div>
+                </div>
+
+                {/* Donor Information */}
+                <div className="space-y-4 pt-6 border-t-2 border-gray-100">
+                  <h3 className="font-semibold text-lg">Your Information (Optional)</h3>
+                  
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="name" className="text-sm mb-2 block">Name</Label>
+                      <Input
+                        id="name"
+                        value={donorName}
+                        onChange={(e) => setDonorName(e.target.value)}
+                        placeholder="John Doe"
+                        className="border-2"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="email" className="text-sm mb-2 block">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={donorEmail}
+                        onChange={(e) => setDonorEmail(e.target.value)}
+                        placeholder="john@example.com"
+                        className="border-2"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="message" className="text-sm mb-2 block">
+                      Message to The Colonial Team (Optional)
+                    </Label>
+                    <Textarea
+                      id="message"
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      placeholder="Share why you support The Colonial..."
+                      rows={4}
+                      className="border-2"
+                    />
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  disabled={!donationAmount || parseFloat(donationAmount) < 1}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white py-6 text-lg font-semibold"
+                >
+                  <Heart className="w-5 h-5 mr-2" />
+                  Donate {donationAmount && `$${donationAmount}`}
+                </Button>
+
+                <p className="text-xs text-gray-500 text-center">
+                  This is a demonstration page. No actual payment processing is configured.
+                </p>
+              </form>
+            </div>
+          </div>
+
+          {/* Impact Sidebar */}
+          <div className="space-y-6">
+            <div className="bg-amber-50 border-2 border-amber-200 p-6">
+              <h3 className="font-serif text-2xl font-bold mb-4">Your Impact</h3>
+              <div className="space-y-4 text-sm">
+                <div className="flex items-start gap-3">
+                  <Coffee className="w-5 h-5 text-amber-700 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold mb-1">$5</p>
+                    <p className="text-gray-700">Helps cover our hosting and basic operating costs</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Newspaper className="w-5 h-5 text-amber-700 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold mb-1">$25</p>
+                    <p className="text-gray-700">Supports compensation for one contributed piece</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Award className="w-5 h-5 text-amber-700 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold mb-1">$50</p>
+                    <p className="text-gray-700">Funds investigative research and fact-checking</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Heart className="w-5 h-5 text-amber-700 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold mb-1">$100+</p>
+                    <p className="text-gray-700">Helps us expand and reach more readers</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white border-2 border-gray-200 p-6">
+              <h3 className="font-serif text-2xl font-bold mb-4">Why Support Us?</h3>
+              <ul className="space-y-3 text-sm text-gray-700">
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold">•</span>
+                  <span>We're 100% reader-supported with no corporate ownership</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold">•</span>
+                  <span>Every dollar goes directly to writers and operations</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold">•</span>
+                  <span>We maintain editorial independence and integrity</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold">•</span>
+                  <span>All content remains free and accessible to everyone</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-gray-50 border-2 border-gray-200 p-6 text-center">
+              <p className="text-sm text-gray-600 italic">
+                "Supporting independent journalism means supporting democracy itself."
+              </p>
+              <p className="text-xs text-gray-500 mt-2">— The Colonial Editorial Board</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Additional Info */}
+        <div className="mt-16 text-center">
+          <h3 className="font-serif text-2xl font-bold mb-4">Other Ways to Support</h3>
+          <p className="text-gray-600 max-w-2xl mx-auto mb-6">
+            Can't donate right now? You can still help by sharing our articles on social media, 
+            subscribing to our newsletter, or submitting your own writing.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Button variant="outline" className="border-2">
+              Share The Colonial
+            </Button>
+            <Button variant="outline" className="border-2">
+              Subscribe to Newsletter
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
